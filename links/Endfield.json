@@ -199,7 +199,7 @@
         },
         "request_version": "",
         "state": 0,
-        "version": "1.0.13"
+        "version": "0.0.0"
       },
       "kind": "get_latest_game"
     }
