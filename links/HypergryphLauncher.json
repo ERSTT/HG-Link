@@ -1,10 +1,10 @@
 {
   "action": 1,
-  "version": "1.0.0",
-  "request_version": "",
-  "zip_package_url": "https://launcher-sign.hycdn.cn/abYeZZ16BPluCFyT/launcher/1.0.0/1/1/rZpm2awG/HypergryphLauncher_1.0.0_1_1_official.zip?auth_key=1768892767-09c9269844d941aca3702f9b3ecea700-0-2ed852a06da8dde353b1f49b4384be34",
+  "description": "",
   "md5": "52d92cb0548bdf6fd570401a86be740c",
   "package_size": "111191226",
+  "request_version": "",
   "total_size": "360842761",
-  "description": ""
+  "version": "1.0.0",
+  "zip_package_url": "https://launcher-sign.hycdn.cn/abYeZZ16BPluCFyT/launcher/1.0.0/1/1/rZpm2awG/HypergryphLauncher_1.0.0_1_1_official.zip?auth_key=1768892969-91f2574d5e2f4f45836db77d90d4f201-0-9ddb75ad20cfc60095a91a1b9736fa99"
 }
