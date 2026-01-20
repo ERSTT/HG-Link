@@ -22,57 +22,79 @@ jobs:
           fetch-depth: 0
 
       - name: Fetch and Compare
-        id: compare_step
         run: |
           mkdir -p links
-          UPDATED_LOG=""
+          FULL_LOG=""
 
-          # 1. 处理游戏列表 (POST)
-          GAMES=(
-            "Arknights;GzD1CpaWgmSq1wew"
-            "Endfield;6LL0KJuqHBVz33WK"
-            "POPUCOM;Vp2jukCCSUGztqli"
-          )
-
-          for game in "${GAMES[@]}"; do
-            NAME=$(echo $game | cut -d';' -f1)
-            CODE=$(echo $game | cut -d';' -f2)
-            FILE="links/${NAME}.json"
+          # 定义处理函数
+          process_game() {
+            local NAME=$1
+            local CODE=$2
+            local FILE="links/${NAME}.json"
+            local TEMP_FILE="temp_${NAME}.json"
             
-            RESPONSE=$(curl -s -X POST "https://launcher.hypergryph.com/api/proxy/batch_proxy" \
+            echo "--- 正在处理 $NAME ---"
+            
+            # 抓取数据并排序保存
+            curl -s -X POST "https://launcher.hypergryph.com/api/proxy/batch_proxy" \
               -H "Content-Type: application/json" \
               -H "User-Agent: Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.15.8 Chrome/87.0.4280.144 Safari/537.36" \
-              -d "{\"proxy_reqs\":[{\"kind\":\"get_latest_game\",\"get_latest_game_req\":{\"appcode\":\"$CODE\",\"channel\":\"1\",\"sub_channel\":\"1\",\"version\":\"\",\"launcher_appcode\":\"\"}}]}")
+              -d "{\"proxy_reqs\":[{\"kind\":\"get_latest_game\",\"get_latest_game_req\":{\"appcode\":\"$CODE\",\"channel\":\"1\",\"sub_channel\":\"1\",\"version\":\"\",\"launcher_appcode\":\"\"}}]}" | jq -S '.' > "$TEMP_FILE"
 
-            NEW_VER=$(echo "$RESPONSE" | jq -r '.proxy_resps[0].get_latest_game_res.game.latest.version // empty')
-            OLD_VER=$( [ -f "$FILE" ] && jq -r '.proxy_resps[0].get_latest_game_res.game.latest.version // empty' "$FILE" || echo "None" )
+            # 修正后的路径：proxy_rsps -> get_latest_game_rsp -> version
+            NEW_VER=$(jq -r '.proxy_rsps[0].get_latest_game_rsp.version // empty' "$TEMP_FILE")
+            
+            if [ -f "$FILE" ]; then
+              OLD_VER=$(jq -r '.proxy_rsps[0].get_latest_game_rsp.version // empty' "$FILE")
+            else
+              OLD_VER="None"
+            fi
+
+            echo "[$NAME] 旧版本: $OLD_VER | 新版本: $NEW_VER"
 
             if [ -n "$NEW_VER" ] && [ "$NEW_VER" != "$OLD_VER" ]; then
-              echo "$RESPONSE" | jq -S '.' > "$FILE"
-              UPDATED_LOG="$UPDATED_LOG $NAME ($OLD_VER -> $NEW_VER)"
+              mv "$TEMP_FILE" "$FILE"
+              FULL_LOG="${FULL_LOG}${NAME} ($OLD_VER -> ${NEW_VER}) "
+            else
+              rm -f "$TEMP_FILE"
             fi
-          done
+            
+            # 将累计的日志写回环境变量
+            echo "FINAL_LOG=$FULL_LOG" >> $GITHUB_ENV
+          }
 
-          # 2. 处理启动器 (GET)
+          # 1. 运行游戏处理
+          process_game "Arknights" "GzD1CpaWgmSq1wew"
+          process_game "Endfield" "6LL0KJuqHBVz33WK"
+          process_game "POPUCOM" "Vp2jukCCSUGztqli"
+
+          # 2. 特殊处理启动器 (GET 请求)
+          echo "--- 正在处理 Launcher ---"
           L_FILE="links/HypergryphLauncher.json"
-          L_RESPONSE=$(curl -s -X GET "https://launcher.hypergryph.com/api/launcher/get_latest?appcode=abYeZZ16BPluCFyT&channel=1" \
-            -H "User-Agent: Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.15.8 Chrome/87.0.4280.144 Safari/537.36")
+          L_TEMP="temp_launcher.json"
+          curl -s -X GET "https://launcher.hypergryph.com/api/launcher/get_latest?appcode=abYeZZ16BPluCFyT&channel=1" \
+            -H "User-Agent: Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.15.8 Chrome/87.0.4280.144 Safari/537.36" | jq -S '.' > "$L_TEMP"
           
-          L_NEW_VER=$(echo "$L_RESPONSE" | jq -r '.version // empty')
+          L_NEW_VER=$(jq -r '.version // empty' "$L_TEMP")
           L_OLD_VER=$( [ -f "$L_FILE" ] && jq -r '.version // empty' "$L_FILE" || echo "None" )
 
-          if [ -n "$L_NEW_VER" ] && [ "$L_NEW_VER" != "$L_OLD_VER" ]; then
-            echo "$L_RESPONSE" | jq -S '.' > "$L_FILE"
-            UPDATED_LOG="$UPDATED_LOG HypergryphLauncher ($L_OLD_VER -> $L_NEW_VER)"
-          fi
+          echo "[Launcher] 旧版本: $L_OLD_VER | 新版本: $L_NEW_VER"
 
-          # 将更新日志存入环境变量供下一步使用
-          echo "UPDATED_LOG=$UPDATED_LOG" >> $GITHUB_ENV
+          if [ -n "$L_NEW_VER" ] && [ "$L_NEW_VER" != "$L_OLD_VER" ]; then
+            mv "$L_TEMP" "$L_FILE"
+            # 注意这里要读取之前的 FINAL_LOG 再次累加
+            echo "FINAL_LOG=${FINAL_LOG}HypergryphLauncher ($L_OLD_VER -> $L_NEW_VER) " >> $GITHUB_ENV
+          else
+            rm -f "$L_TEMP"
+          fi
 
       - name: Commit and Push
         run: |
-          if [ -z "$UPDATED_LOG" ]; then
-            echo "没有版本变动，跳过提交。"
+          # 清洗日志格式：将空格换成逗号并去掉末尾逗号
+          CLEAN_LOG=$(echo "$FINAL_LOG" | sed 's/ $//; s/ /, /g')
+          
+          if [ -z "$CLEAN_LOG" ]; then
+            echo "没有任何版本变动，跳过提交。"
           else
             git config --local user.email "github-actions[bot]@users.noreply.github.com"
             git config --local user.name "github-actions[bot]"
@@ -80,10 +102,7 @@ jobs:
             git add links/*.json
             
             BEIJING_TIME=$(TZ='Asia/Shanghai' date +'%Y-%m-%d %H:%M:%S')
-            
-            # 构建 Commit Message
-            # 去除 UPDATED_LOG 前后的空格并将多个空格转为逗号
-            CLEAN_LOG=$(echo $UPDATED_LOG | sed 's/ /, /g')
+            echo "准备提交: 更新: $CLEAN_LOG $BEIJING_TIME UTC+8"
             
             git commit -m "更新: $CLEAN_LOG $BEIJING_TIME UTC+8"
             git pull --rebase origin main
