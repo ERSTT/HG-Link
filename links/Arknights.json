@@ -104,10 +104,11 @@
         },
         "request_version": "",
         "state": 0,
-        "version": "0.0.0"
+        "version": "69.0.0"
       },
       "kind": "get_latest_game"
     }
   ],
-  "seq": ""
+  "seq": "",
+  "timestamp": "1768894199095"
 }
