@@ -1,0 +1,67 @@
+name: Update Game Links
+
+on:
+  schedule:
+    - cron: '0 * * * *' # 每小时运行一次，你可以根据需要调整
+  workflow_dispatch:      # 允许手动触发测试
+
+jobs:
+  fetch-and-save:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fetch Data and Create Files
+        run: |
+          # 创建存放文件的文件夹
+          mkdir -p links
+
+          # 定义要处理的游戏列表： "名称;AppCode"
+          GAMES=(
+            "Arknights;GzD1CpaWgmSq1wew"
+            "Endfield;6LL0KJuqHBVz33WK"
+            "POPUCOM;Vp2jukCCSUGztqli"
+          )
+
+          for game in "${GAMES[@]}"; do
+            # 分解名称和代码
+            NAME=$(echo $game | cut -d';' -f1)
+            CODE=$(echo $game | cut -d';' -f2)
+
+            echo "正在获取 $NAME ($CODE) 的数据..."
+
+            # 发送请求并直接将返回的整个 JSON 存入对应文件
+            # 如果你只想提取特定部分（比如只保留 game 字段），可以后面接 jq
+            curl -s -X POST "https://launcher.hypergryph.com/api/proxy/batch_proxy" \
+              -H "Content-Type: application/json" \
+              -H "User-Agent: Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.15.8 Chrome/87.0.4280.144 Safari/537.36" \
+              -d "{
+                \"proxy_reqs\": [
+                  {
+                    \"kind\": \"get_latest_game\",
+                    \"get_latest_game_req\": {
+                      \"appcode\": \"$CODE\",
+                      \"channel\": \"1\",
+                      \"sub_channel\": \"1\",
+                      \"version\": \"\",
+                      \"launcher_appcode\": \"\"
+                    }
+                  }
+                ]
+              }" | jq '.' > "links/${NAME}.json"
+          done
+
+      - name: Commit and Push
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add links/*.json
+          
+          # 检查是否有内容变化
+          if git diff --staged --quiet; then
+            echo "没有检测到更新，跳过提交。"
+          else
+            git commit -m "自动更新游戏链接: $(date +'%Y-%m-%d %H:%M')"
+            git push
+          fi
