@@ -55,10 +55,9 @@ jobs:
                   }
                 ]
               }" | jq -S 'del(.. | .timestamp?)' > "links/${NAME}.json"
-              # 注意这里的 jq 逻辑：del(.. | .timestamp?) 会递归删除 JSON 中所有层级的 timestamp 字段
           done
 
-          # 2. 处理启动器 (GET 请求)
+          # 2. 处理启动器
           echo "正在获取启动器数据..."
           curl -s -X GET "https://launcher.hypergryph.com/api/launcher/get_latest?appcode=abYeZZ16BPluCFyT&channel=1" \
             -H "User-Agent: Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.15.8 Chrome/87.0.4280.144 Safari/537.36" \
@@ -71,14 +70,19 @@ jobs:
           
           git add links/*.json
           
-          # 只提取真正变动的文件名
+          # 检查变动
           UPDATED_FILES=$(git diff --name-only --staged | xargs -n1 basename | paste -sd ", " -)
 
           if [ -z "$UPDATED_FILES" ]; then
-            echo "由于排除了时间戳，内容无实质性变化，跳过提交。"
+            echo "内容无实质性变化，跳过提交。"
           else
-            echo "检测到实质性变动的文件: $UPDATED_FILES"
-            git commit -m "自动更新: $UPDATED_FILES"
+            # 获取北京时间 (UTC+8)
+            # TZ='Asia/Shanghai' 可以让 date 命令直接输出中国标准时间
+            BEIJING_TIME=$(TZ='Asia/Shanghai' date +'%Y-%m-%d %H:%M:%S')
+            
+            echo "检测到变动: $UPDATED_FILES"
+            git commit -m "更新时间: $BEIJING_TIME UTC+8"
+            
             git pull --rebase origin main
             git push origin main
           fi
