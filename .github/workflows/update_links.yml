@@ -21,11 +21,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Fetch Data and Create Files
+      - name: Fetch and Compare
+        id: compare_step
         run: |
           mkdir -p links
+          UPDATED_LOG=""
 
-          # 1. 处理游戏列表
+          # 1. 处理游戏列表 (POST)
           GAMES=(
             "Arknights;GzD1CpaWgmSq1wew"
             "Endfield;6LL0KJuqHBVz33WK"
@@ -35,54 +37,55 @@ jobs:
           for game in "${GAMES[@]}"; do
             NAME=$(echo $game | cut -d';' -f1)
             CODE=$(echo $game | cut -d';' -f2)
+            FILE="links/${NAME}.json"
             
-            echo "正在获取游戏数据: $NAME..."
-
-            curl -s -X POST "https://launcher.hypergryph.com/api/proxy/batch_proxy" \
+            RESPONSE=$(curl -s -X POST "https://launcher.hypergryph.com/api/proxy/batch_proxy" \
               -H "Content-Type: application/json" \
               -H "User-Agent: Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.15.8 Chrome/87.0.4280.144 Safari/537.36" \
-              -d "{
-                \"proxy_reqs\": [
-                  {
-                    \"kind\": \"get_latest_game\",
-                    \"get_latest_game_req\": {
-                      \"appcode\": \"$CODE\",
-                      \"channel\": \"1\",
-                      \"sub_channel\": \"1\",
-                      \"version\": \"\",
-                      \"launcher_appcode\": \"\"
-                    }
-                  }
-                ]
-              }" | jq -S 'del(.. | .timestamp?)' > "links/${NAME}.json"
+              -d "{\"proxy_reqs\":[{\"kind\":\"get_latest_game\",\"get_latest_game_req\":{\"appcode\":\"$CODE\",\"channel\":\"1\",\"sub_channel\":\"1\",\"version\":\"\",\"launcher_appcode\":\"\"}}]}")
+
+            NEW_VER=$(echo "$RESPONSE" | jq -r '.proxy_resps[0].get_latest_game_res.game.latest.version // empty')
+            OLD_VER=$( [ -f "$FILE" ] && jq -r '.proxy_resps[0].get_latest_game_res.game.latest.version // empty' "$FILE" || echo "None" )
+
+            if [ -n "$NEW_VER" ] && [ "$NEW_VER" != "$OLD_VER" ]; then
+              echo "$RESPONSE" | jq -S '.' > "$FILE"
+              UPDATED_LOG="$UPDATED_LOG $NAME ($OLD_VER -> $NEW_VER)"
+            fi
           done
 
-          # 2. 处理启动器
-          echo "正在获取启动器数据..."
-          curl -s -X GET "https://launcher.hypergryph.com/api/launcher/get_latest?appcode=abYeZZ16BPluCFyT&channel=1" \
-            -H "User-Agent: Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.15.8 Chrome/87.0.4280.144 Safari/537.36" \
-            | jq -S 'del(.timestamp?)' > "links/HypergryphLauncher.json"
+          # 2. 处理启动器 (GET)
+          L_FILE="links/HypergryphLauncher.json"
+          L_RESPONSE=$(curl -s -X GET "https://launcher.hypergryph.com/api/launcher/get_latest?appcode=abYeZZ16BPluCFyT&channel=1" \
+            -H "User-Agent: Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.15.8 Chrome/87.0.4280.144 Safari/537.36")
+          
+          L_NEW_VER=$(echo "$L_RESPONSE" | jq -r '.version // empty')
+          L_OLD_VER=$( [ -f "$L_FILE" ] && jq -r '.version // empty' "$L_FILE" || echo "None" )
+
+          if [ -n "$L_NEW_VER" ] && [ "$L_NEW_VER" != "$L_OLD_VER" ]; then
+            echo "$L_RESPONSE" | jq -S '.' > "$L_FILE"
+            UPDATED_LOG="$UPDATED_LOG HypergryphLauncher ($L_OLD_VER -> $L_NEW_VER)"
+          fi
+
+          # 将更新日志存入环境变量供下一步使用
+          echo "UPDATED_LOG=$UPDATED_LOG" >> $GITHUB_ENV
 
       - name: Commit and Push
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          
-          git add links/*.json
-          
-          # 检查变动
-          UPDATED_FILES=$(git diff --name-only --staged | xargs -n1 basename | paste -sd ", " -)
-
-          if [ -z "$UPDATED_FILES" ]; then
-            echo "内容无实质性变化，跳过提交。"
+          if [ -z "$UPDATED_LOG" ]; then
+            echo "没有版本变动，跳过提交。"
           else
-            # 获取北京时间 (UTC+8)
-            # TZ='Asia/Shanghai' 可以让 date 命令直接输出中国标准时间
+            git config --local user.email "github-actions[bot]@users.noreply.github.com"
+            git config --local user.name "github-actions[bot]"
+            
+            git add links/*.json
+            
             BEIJING_TIME=$(TZ='Asia/Shanghai' date +'%Y-%m-%d %H:%M:%S')
             
-            echo "检测到变动: $UPDATED_FILES"
-            git commit -m "更新时间: $BEIJING_TIME UTC+8"
+            # 构建 Commit Message
+            # 去除 UPDATED_LOG 前后的空格并将多个空格转为逗号
+            CLEAN_LOG=$(echo $UPDATED_LOG | sed 's/ /, /g')
             
+            git commit -m "更新: $CLEAN_LOG $BEIJING_TIME UTC+8"
             git pull --rebase origin main
             git push origin main
           fi
