@@ -2,25 +2,33 @@ name: Update Game Links
 
 on:
   schedule:
-    - cron: '0 * * * *' # 每小时运行一次
+    - cron: '0 * * * *' # 每小时自动运行一次
   workflow_dispatch:      # 允许手动触发
+
+# 防止多个任务同时运行导致冲突
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   fetch-and-save:
     runs-on: ubuntu-latest
-    permissions: # 显式声明权限，防止 403 错误
-      contents: write
+    permissions:
+      contents: write # 确保 Action 有权限推送代码到仓库
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # 获取完整历史以确保 rebase 成功
 
       - name: Fetch Data and Create Files
         run: |
+          # 创建文件夹
           mkdir -p links
 
           # 1. 处理游戏列表 (POST 请求)
+          # 格式: "文件名;AppCode"
           GAMES=(
             "Arknights;GzD1CpaWgmSq1wew"
             "Endfield;6LL0KJuqHBVz33WK"
@@ -30,7 +38,7 @@ jobs:
           for game in "${GAMES[@]}"; do
             NAME=$(echo $game | cut -d';' -f1)
             CODE=$(echo $game | cut -d';' -f2)
-            echo "正在获取游戏数据: $NAME..."
+            echo "正在获取游戏数据: $NAME ($CODE)..."
 
             curl -s -X POST "https://launcher.hypergryph.com/api/proxy/batch_proxy" \
               -H "Content-Type: application/json" \
@@ -62,14 +70,19 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           
-          # 先拉取最新改动，防止 push 被拒绝
-          git pull --rebase origin main
-          
+          # 添加所有 links 目录下的 json 文件
           git add links/*.json
           
+          # 检查是否有内容变化
           if git diff --staged --quiet; then
-            echo "内容无变化，跳过提交。"
+            echo "数据未发生变化，跳过本次更新。"
           else
-            git commit -m "自动更新数据 (含启动器): $(date +'%Y-%m-%d %H:%M')"
+            # 先提交到本地分支
+            git commit -m "自动更新游戏数据: $(date +'%Y-%m-%d %H:%M')"
+            
+            # 使用 rebase 模式拉取远程更新，确保提交历史是一条直线且不会冲突
+            git pull --rebase origin main
+            
+            # 推送到远程仓库
             git push origin main
           fi
