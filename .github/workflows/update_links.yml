@@ -2,10 +2,9 @@ name: Update Game Links
 
 on:
   schedule:
-    - cron: '0 * * * *' # 每小时自动运行一次
-  workflow_dispatch:      # 允许手动触发
+    - cron: '0 * * * *'
+  workflow_dispatch:
 
-# 防止多个任务同时运行导致冲突
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -14,21 +13,19 @@ jobs:
   fetch-and-save:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # 确保 Action 有权限推送代码到仓库
+      contents: write
     
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # 获取完整历史以确保 rebase 成功
+          fetch-depth: 0
 
       - name: Fetch Data and Create Files
         run: |
-          # 创建文件夹
           mkdir -p links
 
-          # 1. 处理游戏列表 (POST 请求)
-          # 格式: "文件名;AppCode"
+          # 1. 处理游戏列表
           GAMES=(
             "Arknights;GzD1CpaWgmSq1wew"
             "Endfield;6LL0KJuqHBVz33WK"
@@ -38,7 +35,8 @@ jobs:
           for game in "${GAMES[@]}"; do
             NAME=$(echo $game | cut -d';' -f1)
             CODE=$(echo $game | cut -d';' -f2)
-            echo "正在获取游戏数据: $NAME ($CODE)..."
+            
+            echo "正在获取游戏数据: $NAME..."
 
             curl -s -X POST "https://launcher.hypergryph.com/api/proxy/batch_proxy" \
               -H "Content-Type: application/json" \
@@ -56,33 +54,31 @@ jobs:
                     }
                   }
                 ]
-              }" | jq '.' > "links/${NAME}.json"
+              }" | jq -S 'del(.. | .timestamp?)' > "links/${NAME}.json"
+              # 注意这里的 jq 逻辑：del(.. | .timestamp?) 会递归删除 JSON 中所有层级的 timestamp 字段
           done
 
           # 2. 处理启动器 (GET 请求)
           echo "正在获取启动器数据..."
           curl -s -X GET "https://launcher.hypergryph.com/api/launcher/get_latest?appcode=abYeZZ16BPluCFyT&channel=1" \
             -H "User-Agent: Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.15.8 Chrome/87.0.4280.144 Safari/537.36" \
-            | jq '.' > "links/HypergryphLauncher.json"
+            | jq -S 'del(.timestamp?)' > "links/HypergryphLauncher.json"
 
       - name: Commit and Push
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           
-          # 添加所有 links 目录下的 json 文件
           git add links/*.json
           
-          # 检查是否有内容变化
-          if git diff --staged --quiet; then
-            echo "数据未发生变化，跳过本次更新。"
+          # 只提取真正变动的文件名
+          UPDATED_FILES=$(git diff --name-only --staged | xargs -n1 basename | paste -sd ", " -)
+
+          if [ -z "$UPDATED_FILES" ]; then
+            echo "由于排除了时间戳，内容无实质性变化，跳过提交。"
           else
-            # 先提交到本地分支
-            git commit -m "自动更新游戏数据: $(date +'%Y-%m-%d %H:%M')"
-            
-            # 使用 rebase 模式拉取远程更新，确保提交历史是一条直线且不会冲突
+            echo "检测到实质性变动的文件: $UPDATED_FILES"
+            git commit -m "自动更新: $UPDATED_FILES"
             git pull --rebase origin main
-            
-            # 推送到远程仓库
             git push origin main
           fi
