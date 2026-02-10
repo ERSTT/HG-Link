@@ -99,7 +99,7 @@ jobs:
             git add links-global/*.json
             
             BEIJING_TIME=$(TZ='Asia/Shanghai' date +'%Y-%m-%d %H:%M:%S')
-            git commit -m "update: $COMMIT_MSG $BEIJING_TIME UTC+8"
+            git commit -m "Update: $COMMIT_MSG $BEIJING_TIME UTC+8"
             git pull --rebase origin main
             git push origin main
           fi
