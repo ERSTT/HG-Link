@@ -7,6 +7,8 @@
 
 ## Arknights / 明日方舟
 
+- **多平台智能识别:** 
+  - [https://ak.hypergryph.com/download](https://ak.hypergryph.com/download)
 - **安卓:**  
   - [https://ak.hypergryph.com/downloads/android_lastest](https://ak.hypergryph.com/downloads/android_lastest)  
   - [https://launcher.hypergryph.com/game/latest/GzD1CpaWgmSq1wew/1/1](https://launcher.hypergryph.com/game/latest/GzD1CpaWgmSq1wew/1/1)
