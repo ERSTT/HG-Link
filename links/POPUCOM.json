@@ -3,72 +3,79 @@
     {
       "get_latest_game_rsp": {
         "action": 1,
+        "client_version": "1.2.0",
         "launcher_action": 0,
         "patch": null,
         "pkg": {
           "file_id": "0",
-          "file_path": "https://popucom.hycdn.cn/Vp2jukCCSUGztqli/1.1/update/1/1/Windows/1.1.2_OOMdICeLXEqI1cNj/files",
-          "game_files_md5": "9dfea3832e51537b994425f7cebf6411",
+          "file_path": "https://popucom.hycdn.cn/Vp2jukCCSUGztqli/1.2/update/1/1/Windows/1.2.0_5JqTS03LTgPo8NeP/files",
+          "game_files_md5": "3e07d3e01ffe1945210ef11098e479f8",
           "md5": "",
           "package_size": "0",
           "packs": [
             {
-              "md5": "e0f43eda6d14c079336a7c37898536ac",
+              "md5": "3e3d09430b8f54b7cf684488ef45fb73",
               "package_size": "1073741824",
-              "url": "https://popucom-sign.hycdn.cn/Vp2jukCCSUGztqli/1.1/update/1/1/Windows/1.1.2_OOMdICeLXEqI1cNj/packs/1.1.2_OOMdICeLXEqI1cNj.zip.001?auth_key=1770187498-3e69e3f9a79a47da9cc0d473e128cd3d-0-b6ae9f21b76af4e4f7a23e5e80aa0945"
+              "url": "https://popucom-sign.hycdn.cn/Vp2jukCCSUGztqli/1.2/update/1/1/Windows/1.2.0_5JqTS03LTgPo8NeP/packs/1.2.0_5JqTS03LTgPo8NeP.zip.001?auth_key=1779954840-2dccdb395286480fa8b4cbc1705b37a1-0-1308018dcf73366d081dd3a0069460bc"
             },
             {
-              "md5": "3377393a22ccb7df61e45c1b2cfa72d9",
+              "md5": "fab3545bb1e494bdff804df371459e13",
               "package_size": "1073741824",
-              "url": "https://popucom-sign.hycdn.cn/Vp2jukCCSUGztqli/1.1/update/1/1/Windows/1.1.2_OOMdICeLXEqI1cNj/packs/1.1.2_OOMdICeLXEqI1cNj.zip.002?auth_key=1770187498-c0a78736823a4d13b11c3735d359748e-0-04e7370e5c6f2a947f72538d7d353c1b"
+              "url": "https://popucom-sign.hycdn.cn/Vp2jukCCSUGztqli/1.2/update/1/1/Windows/1.2.0_5JqTS03LTgPo8NeP/packs/1.2.0_5JqTS03LTgPo8NeP.zip.002?auth_key=1779954840-7e87f3d4018447f7a9d2f3bd87f170c8-0-f5a4fc2cb3d08b85d4fbb1ad4ced3efb"
             },
             {
-              "md5": "19e19829e6941d5feac58fca4437df66",
+              "md5": "fb7fecf027dc1cc3810e9f707fafc3cd",
               "package_size": "1073741824",
-              "url": "https://popucom-sign.hycdn.cn/Vp2jukCCSUGztqli/1.1/update/1/1/Windows/1.1.2_OOMdICeLXEqI1cNj/packs/1.1.2_OOMdICeLXEqI1cNj.zip.003?auth_key=1770187498-5bd5bfb59e124d6080caa94207f5fb3c-0-4c9a6cf95db9952da138944ffa2b4f53"
+              "url": "https://popucom-sign.hycdn.cn/Vp2jukCCSUGztqli/1.2/update/1/1/Windows/1.2.0_5JqTS03LTgPo8NeP/packs/1.2.0_5JqTS03LTgPo8NeP.zip.003?auth_key=1779954840-5d2e8bdc59004f4baeb8f915354c7043-0-3c4452a96cbefe8999dc670b17f5fe9c"
             },
             {
-              "md5": "2dadb25ad6044aa6238f28743d9326a0",
+              "md5": "b8ea99c15c3c144b465844167e7356dc",
               "package_size": "1073741824",
-              "url": "https://popucom-sign.hycdn.cn/Vp2jukCCSUGztqli/1.1/update/1/1/Windows/1.1.2_OOMdICeLXEqI1cNj/packs/1.1.2_OOMdICeLXEqI1cNj.zip.004?auth_key=1770187498-0a3bc30cb59340baa694fe920cad6410-0-046c15468a6e862bd22cb54d93f68d2e"
+              "url": "https://popucom-sign.hycdn.cn/Vp2jukCCSUGztqli/1.2/update/1/1/Windows/1.2.0_5JqTS03LTgPo8NeP/packs/1.2.0_5JqTS03LTgPo8NeP.zip.004?auth_key=1779954840-46584814108c4181a05cedb02b49d4fd-0-94a09c6a2abefc7aba04ad1b3b24cde7"
             },
             {
-              "md5": "927d94490ac2416a5791b276dd99b133",
+              "md5": "17f6d13e97db8766dc6de5e2287e8e77",
               "package_size": "1073741824",
-              "url": "https://popucom-sign.hycdn.cn/Vp2jukCCSUGztqli/1.1/update/1/1/Windows/1.1.2_OOMdICeLXEqI1cNj/packs/1.1.2_OOMdICeLXEqI1cNj.zip.005?auth_key=1770187498-ccee1c55fd9643afb1f86fedb57ceb17-0-51a9e0bedf15b4a5c3f691acf68b45e4"
+              "url": "https://popucom-sign.hycdn.cn/Vp2jukCCSUGztqli/1.2/update/1/1/Windows/1.2.0_5JqTS03LTgPo8NeP/packs/1.2.0_5JqTS03LTgPo8NeP.zip.005?auth_key=1779954840-8cd17b83086740448da80b5798f26c61-0-267eac5981f76c0bdb3f99295807be54"
             },
             {
-              "md5": "8349ed71e41567f409a4cdc4946a7283",
+              "md5": "e995b70aa0629eff1c4300fa6abe92e0",
               "package_size": "1073741824",
-              "url": "https://popucom-sign.hycdn.cn/Vp2jukCCSUGztqli/1.1/update/1/1/Windows/1.1.2_OOMdICeLXEqI1cNj/packs/1.1.2_OOMdICeLXEqI1cNj.zip.006?auth_key=1770187498-3cc1693b35034d4897111daee51ed54f-0-849d72aeb5454c8dcc178f3adca92ce5"
+              "url": "https://popucom-sign.hycdn.cn/Vp2jukCCSUGztqli/1.2/update/1/1/Windows/1.2.0_5JqTS03LTgPo8NeP/packs/1.2.0_5JqTS03LTgPo8NeP.zip.006?auth_key=1779954840-002896eb0ec14e88bd4e211e60ea6bef-0-c7f9b953c324a3d2304dce763c6b152b"
             },
             {
-              "md5": "22a55b67bb3582aad028cc8dd189060b",
+              "md5": "f685b35e384c5661b853db026992dfcb",
               "package_size": "1073741824",
-              "url": "https://popucom-sign.hycdn.cn/Vp2jukCCSUGztqli/1.1/update/1/1/Windows/1.1.2_OOMdICeLXEqI1cNj/packs/1.1.2_OOMdICeLXEqI1cNj.zip.007?auth_key=1770187498-d0a6fca2c6ee44ceb3df3a9b5901520a-0-5eed30b23de400dd13bf31ec7bb109c9"
+              "url": "https://popucom-sign.hycdn.cn/Vp2jukCCSUGztqli/1.2/update/1/1/Windows/1.2.0_5JqTS03LTgPo8NeP/packs/1.2.0_5JqTS03LTgPo8NeP.zip.007?auth_key=1779954840-334ce1064c444d7888f775f48cc4da22-0-0117ac6d25916d1c012b164dfc16819a"
             },
             {
-              "md5": "92b894b544d1d8beb0e5803895239caa",
+              "md5": "b6f78fa4bd5c84e29942131209f589e7",
               "package_size": "1073741824",
-              "url": "https://popucom-sign.hycdn.cn/Vp2jukCCSUGztqli/1.1/update/1/1/Windows/1.1.2_OOMdICeLXEqI1cNj/packs/1.1.2_OOMdICeLXEqI1cNj.zip.008?auth_key=1770187498-898dae3cb74a4a29b439033a6583659d-0-4f93badd8276b36ecec1d1eaa4cef951"
+              "url": "https://popucom-sign.hycdn.cn/Vp2jukCCSUGztqli/1.2/update/1/1/Windows/1.2.0_5JqTS03LTgPo8NeP/packs/1.2.0_5JqTS03LTgPo8NeP.zip.008?auth_key=1779954840-2c41bf5ed92b4bf3a646d90803de4888-0-04e70606f8f2f828f7fc04b9ab09e2de"
             },
             {
-              "md5": "fea3346885ee5842f0762ecde60078bb",
-              "package_size": "676778303",
-              "url": "https://popucom-sign.hycdn.cn/Vp2jukCCSUGztqli/1.1/update/1/1/Windows/1.1.2_OOMdICeLXEqI1cNj/packs/1.1.2_OOMdICeLXEqI1cNj.zip.009?auth_key=1770187498-0c572c388c4e4eca9037a5d20fb1cb6b-0-7fe5048fb29b646b763239849d555d7f"
+              "md5": "b5e8f191e9dc15abe09d97e396f49ff5",
+              "package_size": "1073741824",
+              "url": "https://popucom-sign.hycdn.cn/Vp2jukCCSUGztqli/1.2/update/1/1/Windows/1.2.0_5JqTS03LTgPo8NeP/packs/1.2.0_5JqTS03LTgPo8NeP.zip.009?auth_key=1779954840-258bc7054f854785b5baa578259e9622-0-c607443c143e35576a4d372f2a0b26cb"
+            },
+            {
+              "md5": "55ac0a6c082d2288bf3767618256e7b3",
+              "package_size": "2032182",
+              "url": "https://popucom-sign.hycdn.cn/Vp2jukCCSUGztqli/1.2/update/1/1/Windows/1.2.0_5JqTS03LTgPo8NeP/packs/1.2.0_5JqTS03LTgPo8NeP.zip.010?auth_key=1779954840-989669958c5c4abaa2d331065c2eb0a8-0-b31cca95687b32a1477be5753079fe7a"
             }
           ],
           "sub_channel": "1",
-          "total_size": "20004104466",
+          "total_size": "20850795158",
           "url": ""
         },
+        "pre_patch": null,
         "request_version": "",
         "state": 0,
-        "version": "1.1.2"
+        "version": "1.2.0"
       },
       "kind": "get_latest_game"
     }
   ],
   "seq": "",
-  "timestamp": "1770187498044"
+  "timestamp": "1779954840452"
 }
