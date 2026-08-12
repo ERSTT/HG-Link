@@ -1,0 +1,123 @@
+name: Update Game Links Bilibili
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fetch-and-save:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch and Compare
+        run: |
+          mkdir -p links-bilibili
+          # 创建一个临时文件来存储日志，避免环境变量在循环中覆盖
+          touch update_msg.txt
+
+          process_game() {
+            local NAME=$1
+            local CODE=$2
+            local FILE="links-bilibili/${NAME}.json"
+            local TEMP_FILE="temp_${NAME}.json"
+            
+            echo "--- 正在处理 $NAME ---"
+            
+            curl -s -X POST "https://launcher.hypergryph.com/api/proxy/batch_proxy" \
+              -H "Content-Type: application/json" \
+              -H "User-Agent: Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.15.8 Chrome/87.0.4280.144 Safari/537.36" \
+              -d "{\"proxy_reqs\":[{\"kind\":\"get_latest_game\",\"get_latest_game_req\":{\"appcode\":\"$CODE\",\"channel\":\"2\",\"sub_channel\":\"2\",\"version\":\"\",\"launcher_appcode\":\"\"}}]}" | jq -S '.' > "$TEMP_FILE"
+
+            NEW_VER=$(jq -r '.proxy_rsps[0].get_latest_game_rsp.version // empty' "$TEMP_FILE")
+            
+            # 如果文件不存在，旧版本设为 None
+            if [ -f "$FILE" ]; then
+              OLD_VER=$(jq -r '.proxy_rsps[0].get_latest_game_rsp.version // empty' "$FILE")
+            else
+              OLD_VER="None"
+            fi
+
+            echo "[$NAME] 旧版本: $OLD_VER | 新版本: $NEW_VER"
+
+            # 只要新版本不为空且与旧版本不同（包括 None -> 0.0.0）
+            if [ -n "$NEW_VER" ] && [ "$NEW_VER" != "$OLD_VER" ]; then
+              mv "$TEMP_FILE" "$FILE"
+              echo "${NAME} ($OLD_VER -> ${NEW_VER})" >> update_msg.txt
+            else
+              rm -f "$TEMP_FILE"
+            fi
+          }
+
+          # 启动器处理函数
+          process_launcher() {
+            local NAME=$1
+            local APPCODE=$2
+            local TARGET_APP=$3
+            local FILE="links-bilibili/HypergryphLauncher-${NAME}.json"
+            local TEMP_FILE="temp_launcher_${NAME}.json"
+
+            echo "--- 正在处理启动器: HypergryphLauncher-${NAME} ---"
+
+            curl -s -X GET "https://launcher.hypergryph.com/api/launcher/get_latest?appcode=${APPCODE}&channel=2&sub_channel=2&target_app=${TARGET_APP}" \
+              -H "User-Agent: Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.15.8 Chrome/87.0.4280.144 Safari/537.36" | jq -S '.' > "$TEMP_FILE"
+
+            L_NEW_VER=$(jq -r '.version // empty' "$TEMP_FILE")
+
+            if [ -f "$FILE" ]; then
+              L_OLD_VER=$(jq -r '.version // empty' "$FILE")
+            else
+              L_OLD_VER="None"
+            fi
+
+            echo "[Launcher-${NAME}] 旧版本: $L_OLD_VER | 新版本: $L_NEW_VER"
+
+            if [ -n "$L_NEW_VER" ] && [ "$L_NEW_VER" != "$L_OLD_VER" ]; then
+              mv "$TEMP_FILE" "$FILE"
+              echo "HypergryphLauncher-${NAME} ($L_OLD_VER -> $L_NEW_VER)" >> update_msg.txt
+            else
+              rm -f "$TEMP_FILE"
+            fi
+          }
+
+          # 1. 运行游戏处理
+          process_game "Arknights" "GzD1CpaWgmSq1wew"
+          process_game "Endfield" "6LL0KJuqHBVz33WK"
+          # process_game "POPUCOM" "Vp2jukCCSUGztqli"
+
+          # 2. 运行启动器处理
+          process_launcher "Arknights" "Ae1Pa3Oi2PRHpLAP" "Arknights"
+          process_launcher "Endfield" "RhAij5MdwvTWpQ8N" "EndField"
+
+          # 将最终日志合并存入环境变量
+          if [ -s update_msg.txt ]; then
+            FINAL_LOG=$(paste -sd "," update_msg.txt | sed 's/,/, /g')
+            echo "COMMIT_MSG=$FINAL_LOG" >> $GITHUB_ENV
+          fi
+
+      - name: Commit and Push
+        run: |
+          if [ -z "$COMMIT_MSG" ]; then
+            echo "没有任何变动。"
+          else
+            git config --local user.email "github-actions[bot]@users.noreply.github.com"
+            git config --local user.name "github-actions[bot]"
+            
+            git add links-bilibili/*.json
+            
+            BEIJING_TIME=$(TZ='Asia/Shanghai' date +'%Y-%m-%d %H:%M:%S')
+            git commit -m "更新: $COMMIT_MSG $BEIJING_TIME UTC+8"
+            git pull --rebase origin main
+            git push origin main
+          fi

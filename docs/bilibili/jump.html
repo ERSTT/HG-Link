@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>游戏下载</title>
+</head>
+<body>
+    <div id="content">正在加载下载链接...</div>
+
+    <script>
+        window.onload = async function() {
+            try {
+                const response = await fetch('./bilibili.json?t=' + new Date().getTime());
+                const links = await response.json();
+                const urlParams = new URLSearchParams(window.location.search);
+                const game = urlParams.get('game');
+
+                const gameLinks = links[game];
+                if (gameLinks && gameLinks.length > 0) {
+                    const mainUrl = gameLinks[0];
+                    
+                    // 使用 iframe 触发自动下载，同时不让页面直接跳走
+                    const iframe = document.createElement('iframe');
+                    iframe.style.display = 'none';
+                    iframe.src = mainUrl;
+                    document.body.appendChild(iframe);
+
+                    let html = `<p>正在为您自动下载，如果没有反应，请选择以下线路手动下载：</p>`;
+                    gameLinks.forEach((url, index) => {
+                        let lineName = (index === 0) ? "主链接" : `备用链接 ${index}`;
+                        html += `<p><a href="${url}" style="font-size: 18px; color: blue;" target="_blank">${lineName}: 点此下载</a></p>`;
+                    });
+                    document.getElementById('content').innerHTML = html;
+                } else {
+                    document.getElementById('content').innerHTML = "<p>无效的游戏参数或链接不存在。</p>";
+                }
+            } catch (e) {
+                document.getElementById('content').innerHTML = "<p>下载链接加载失败，请稍后再试。</p>";
+            }
+        };
+    </script>
+</body>
+</html>

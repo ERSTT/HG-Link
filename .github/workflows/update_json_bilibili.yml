@@ -1,0 +1,55 @@
+name: Update bilibili link
+
+on:
+  push:
+    paths:
+      - 'links-bilibili/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update bilibili.json
+        run: |
+          mkdir -p docs/bilibili
+
+          ARGN=$(curl -s "https://line1-h5-pc-api.biligame.com/game/detail/gameinfo?game_base_id=101772")
+          ENDF=$(curl -s "https://line1-h5-pc-api.biligame.com/game/detail/gameinfo?game_base_id=108406")
+
+          jq -n \
+            --arg aa "$(echo "$ARGN" | jq -r '.data.android_download_link')" \
+            --arg aa2 "$(echo "$ARGN" | jq -r '.data.android_download_link2')" \
+            --arg ap "$(echo "$ARGN" | jq -r '.data.related_pc_game.pc_download_link // .data.pc_download_link')" \
+            --arg ap2 "$(echo "$ARGN" | jq -r '.data.related_pc_game.pc_download_link2 // .data.pc_download_link2')" \
+            --arg ea "$(echo "$ENDF" | jq -r '.data.android_download_link')" \
+            --arg ea2 "$(echo "$ENDF" | jq -r '.data.android_download_link2')" \
+            --arg ep "$(echo "$ENDF" | jq -r '.data.related_pc_game.pc_download_link // .data.pc_download_link')" \
+            --arg ep2 "$(echo "$ENDF" | jq -r '.data.related_pc_game.pc_download_link2 // .data.pc_download_link2')" \
+            '{
+              "arknights_apk": [$aa, $aa2],
+              "arknights_launcher": [$ap, $ap2],
+              "endfield_apk": [$ea, $ea2],
+              "endfield_launcher": [$ep, $ep2]
+            }' > docs/bilibili/bilibili.json
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add docs/bilibili/bilibili.json
+          
+          if git diff --staged --quiet; then
+            echo "没有任何变动。"
+          else
+            git commit -m "update bilibili direct links json"
+            CURRENT_BRANCH=${{ github.ref_name }}
+            git pull --rebase origin "$CURRENT_BRANCH"
+            git push origin "HEAD:$CURRENT_BRANCH"
+          fi

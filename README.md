@@ -3,7 +3,7 @@
 
 **HG-Link** is a repository that regularly updates direct download links related to **Hypergryph**, making it easy to quickly access the latest resources.
 
-# **Global Server**
+# **Global Server (Official)**
 
 ## Endfield
 
@@ -19,7 +19,7 @@
   - Links point to a JSON file containing the latest version download URLs and version info  
   - [https://github.com/ERSTT/HG-Link/blob/main/links-global/GRYPHLINK.json](links-global/GRYPHLINK.json)
 
-# **CN Server**
+# **CN Server (Official)**
 
 ## Arknights
 
@@ -51,3 +51,39 @@
 - **Windows Portable:**  
   - Links point to a JSON file containing the latest version download URLs and version info  
   - [https://github.com/ERSTT/HG-Link/blob/main/links/HypergryphLauncher.json](links/HypergryphLauncher.json)
+
+# **BILIBILI Server**
+
+## Arknights
+
+- **Android:**  
+  - [Download (Bilibili Direct Link)](https://erstt.github.io/HG-Link/bilibili/jump.html?game=arknights_apk) 
+  - [https://launcher.hypergryph.com/game/latest/GzD1CpaWgmSq1wew/2/2](https://launcher.hypergryph.com/game/latest/GzD1CpaWgmSq1wew/2/2)
+- **Windows:**  
+  - Links point to a JSON file containing the latest version download URLs and version info  
+  - [https://github.com/ERSTT/HG-Link/blob/main/links-bilibili/Arknights.json](links-bilibili/Arknights.json)
+
+## Endfield
+
+- **Android:**  
+  - [Download (Bilibili Direct Link)](https://erstt.github.io/HG-Link/bilibili/jump.html?game=endfield_apk) 
+  - [https://launcher.hypergryph.com/game/latest/6LL0KJuqHBVz33WK/2/2](https://launcher.hypergryph.com/game/latest/6LL0KJuqHBVz33WK/2/2)
+- **Windows:**  
+  - Links point to a JSON file containing the latest version download URLs and version info 
+  - [https://github.com/ERSTT/HG-Link/blob/mainlinks-bilibili/Endfield.json](links-bilibili/Endfield.json)
+
+## Hypergryph Launcher Arknights
+
+- **Windows:**  
+  - [Download (Bilibili Direct Link)](https://erstt.github.io/HG-Link/bilibili/jump.html?game=arknights_launcher)  
+- **Windows Portable:**  
+  - Links point to a JSON file containing the latest version download URLs and version info 
+  - [https://github.com/ERSTT/HG-Link/blob/main/links-bilibili/HypergryphLauncher-Arknights.json](links-bilibili/HypergryphLauncher-Arknights.json)
+
+## Hypergryph Launcher EndField
+
+- **Windows:**  
+  - [Download (Bilibili Direct Link)](https://erstt.github.io/HG-Link/bilibili/jump.html?game=endfield_launcher)   
+- **Windows Portable:**  
+  - Links point to a JSON file containing the latest version download URLs and version info 
+  - [https://github.com/ERSTT/HG-Link/blob/main/links-bilibili/HypergryphLauncher-Endfield.json](links-bilibili/HypergryphLauncher-Endfield.json)
